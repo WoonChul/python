@@ -384,3 +384,44 @@ class GeoMetry:
             y1 = y2
 
         return length
+
+    def InSideAngle(self, L1, L2) :
+        L1_ANG = self.angle(L1[0],L1[1],L1[2],L1[3])
+        L2_ANG = self.angle(L2[0],L2[1],L2[2],L2[3])
+
+        CHK_ANG = round(abs(L1_ANG - L2_ANG))
+        
+        if CHK_ANG == 180 or CHK_ANG == 0 :
+            return -1
+        else :
+            return CHK_ANG < 180 if 180 - (L1_ANG  - L2_ANG) else (L1_ANG  - L2_ANG) - 180
+        
+    def CircleToCenterDist(self, DEG, R) :
+        return R / math.sin(DEG * self.pi / 180)
+
+    def CornerHolePoint(self, L1, L2, R_SIZE) :
+        InSection = self.FindLineInterSection(L1[0],L1[1],L1[2],L1[3],L2[0],L2[1],L2[2],L2[3])
+        if InSection == "none" or InSection == "coincident" :
+            return
+        
+        ANGLE = self.InSideAngle(L1, L2)
+        HALF_ANGLE = ANGLE / 2
+        L1_ANGLE = self.angle(L1[0],L1[1],L1[2],L1[3])
+        L2_ANGLE = self.angle(L2[0],L2[1],L2[2],L2[3])
+        #CCW_LINE = self.ccw(L1[2],L1[3],L2[0],L2[1],L2[2],L2[3])
+
+        if L2_ANGLE <= 180 :
+            if L2_ANGLE < L1_ANGLE and L2_ANGLE + 180 > L1_ANGLE :
+                CEN_ANGLE = L2_ANGLE - HALF_ANGLE
+            else :
+                CEN_ANGLE = L2_ANGLE + HALF_ANGLE
+        else :
+            if L2_ANGLE > L1_ANGLE and L2_ANGLE - 180 < L1_ANGLE :
+                CEN_ANGLE = L2_ANGLE + HALF_ANGLE
+            else :
+                CEN_ANGLE = L2_ANGLE - HALF_ANGLE
+
+        DIST = self.CircleToCenterDist(HALF_ANGLE, R_SIZE)
+        HALF_POS = self.movePointInDirection(InSection,CEN_ANGLE,DIST)
+        
+        return HALF_POS
